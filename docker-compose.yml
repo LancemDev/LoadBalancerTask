@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  loadbalancer:
+    build:
+      context: .
+      dockerfile: load_balancer/Dockerfile
+    ports:
+      - "5000:5000"
+    networks:
+      - app-network
+    depends_on:
+      - server1
+      - server2
+      - server3
+
+  server1:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      - SERVER_ID=1
+    ports:
+      - "5001:5000"
+    networks:
+      - app-network
+
+  server2:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      - SERVER_ID=2
+    ports:
+      - "5002:5000"
+    networks:
+      - app-network
+
+  server3:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      - SERVER_ID=3
+    ports:
+      - "5003:5000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
