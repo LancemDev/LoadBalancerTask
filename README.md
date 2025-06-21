@@ -12,8 +12,8 @@ A distributed load balancer implementation using consistent hashing algorithm to
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd loadbalancer
+   git clone https://github.com/LancemDev/LoadBalancerTask.git
+   cd LoadBalancerTask
    ```
 
 2. **Build and start the services**
