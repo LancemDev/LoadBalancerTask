@@ -71,27 +71,18 @@ A distributed load balancer implementation using consistent hashing algorithm to
 
 ## Architecture
 
-```
-+----------------+      +-----------------+      +----------------+
-|                |      |                 |      |                |
-|   Client       +----->+  Load Balancer  +---->+  Server 1     |
-|                |      |                 |     |  (server1:5001) |
-+----------------+      +--------+--------+     +----------------+
-                                 |
-                                 |                +----------------+
-                                 |                |                |
-                                 +-------------->+  Server 2     |
-                                 |                |  (server2:5002) |
-                                 |                |                |
-                                 |                +----------------+
-                                 |
-                                 |                +----------------+
-                                 |                |                |
-                                 +-------------->+  Server 3     |
-                                                |  (server3:5003) |
-                                                |                |
-                                                +----------------+
-```
+![System Architecture](assets/screenshot.png)
+
+The architecture consists of:
+- **Client**: Sends HTTP requests to the load balancer
+- **Load Balancer**: Distributes incoming requests to backend servers using consistent hashing
+- **Servers**: Multiple server instances that handle the actual workload
+
+Key components:
+- **Consistent Hashing Ring**: Maps requests to servers using virtual nodes
+- **Health Checker**: Periodically verifies server health
+- **Request Router**: Forwards requests to appropriate servers
+- **API Endpoints**: For managing the server pool dynamically
 
 ## API Endpoints
 
