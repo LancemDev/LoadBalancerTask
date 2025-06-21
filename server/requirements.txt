@@ -2,4 +2,3 @@ flask
 flask-cors
 flask-socketio
 python-dotenv
-os
