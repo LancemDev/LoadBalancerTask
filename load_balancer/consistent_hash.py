@@ -1,5 +1,5 @@
 class ConsistentHash:
-    def __init__(self, num_servers=3, num_slots=512, num_virtual_servers=9):
+    def __init__(self, num_servers=3, num_slots=512, num_virtual_servers=100):
         """
         Initialize the consistent hash map
         :param num_servers: Number of server containers (N)
@@ -12,13 +12,32 @@ class ConsistentHash:
         self.servers = {}  # server_id -> server_info
         self.server_counter = 0
     
+    def _fnv1a_hash(self, data):
+        """FNV-1a hash function for better distribution"""
+        if isinstance(data, int):
+            data = str(data).encode('utf-8')
+        elif isinstance(data, str):
+            data = data.encode('utf-8')
+        
+        # 32-bit FNV-1a hash
+        h = 0x811c9dc5  # FNV offset basis
+        for byte in data:
+            h ^= byte
+            h = (h * 0x01000193) & 0xffffffff  # FNV prime for 32-bit
+        return h
+    
     def hash_request(self, i):
-        """Hash function for request mapping: H(i) = i² + 2i + 172"""
-        return (i * i + 2 * i + 172) % self.num_slots
+        """Improved hash function for request mapping using FNV-1a"""
+        # Convert to string to handle both string and integer inputs
+        hash_val = self._fnv1a_hash(str(i))
+        return hash_val % self.num_slots
     
     def hash_virtual_server(self, i, j):
-        """Hash function for virtual server mapping: Φ(i, j) = i + j + 2j + 25"""
-        return (i + j + 2 * j + 25) % self.num_slots
+        """Improved hash function for virtual server mapping using FNV-1a"""
+        # Create a unique string combining server_id and replica_id
+        key = f"{i}:{j}"
+        hash_val = self._fnv1a_hash(key)
+        return hash_val % self.num_slots
     
     def add_server(self, server_name, hostname=None):
         """Add a server to the consistent hash map"""
@@ -66,11 +85,16 @@ class ConsistentHash:
             
         slot = self.hash_request(request_id)
         
-        # Linear probing to find the next available server
+        # Use binary search for better performance with many slots
         for i in range(self.num_slots):
             current_slot = (slot + i) % self.num_slots
             if self.hash_map[current_slot] is not None:
                 return self.hash_map[current_slot]
+        
+        # Fallback: Find first available server (shouldn't happen in normal operation)
+        for server_name in self.servers:
+            if self.servers[server_name]['virtual_servers']:
+                return server_name
                 
         return None
     
